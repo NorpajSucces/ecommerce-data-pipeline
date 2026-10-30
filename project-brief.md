@@ -18,7 +18,7 @@ it can support reliable analysis.
 - Customers
 
 ## Expected Output
-A monthly summary table containing:
+A monthly summary view containing:
 - Order month
 - Number of orders
 - Total item value, excluding freight
@@ -32,10 +32,14 @@ A monthly summary table containing:
 ## Completion Criteria
 - The three source datasets are loaded successfully.
 - Relevant data quality issues are identified and documented.
-- The monthly summary table is created.
+- The monthly summary view is created.
 - Summary results are checked against the source data.
 
-## Decisions to Confirm After Data Inspection
-- Which order statuses should be included?
-- Which timestamp should define the order month?
-- How should missing or invalid values be handled?
+## Confirmed V1 Decisions
+- Include delivered orders in monthly analytics.
+- Group orders by `order_purchase_timestamp`.
+- Sum item prices and exclude freight.
+- Preserve all source order statuses in staging.
+- Convert empty CSV fields to SQL NULL.
+- Stop loading on malformed records or database constraint violations.
+- Reject initial loading when the target table is not empty.

@@ -15,8 +15,7 @@
 - Calculate total item value excluding freight.
 
 ## Remaining Checks
-- Validate purchase timestamps.
-- Check customer references.
+
 
 ## Purchase Timestamp Validation
 - Checked column: `order_purchase_timestamp`.
