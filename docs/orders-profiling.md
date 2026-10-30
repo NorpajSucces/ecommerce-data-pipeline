@@ -18,4 +18,11 @@
 - Validate purchase timestamps.
 - Check customer references.
 - Check relationships between orders and order items.
-- Validate item prices before aggregation.
+
+## Purchase Timestamp Validation
+- Checked column: `order_purchase_timestamp`.
+- Parsing format: `%Y-%m-%d %H:%M:%S`.
+- Rows with missing purchase timestamp: 0.
+- Rows with successfully parsed purchase timestamp: 99,441.
+- Rows with invalid non-empty purchase timestamp: 0.
+- All rows have a populated and parseable purchase timestamp.
