@@ -17,7 +17,6 @@
 ## Remaining Checks
 - Validate purchase timestamps.
 - Check customer references.
-- Check relationships between orders and order items.
 
 ## Purchase Timestamp Validation
 - Checked column: `order_purchase_timestamp`.
