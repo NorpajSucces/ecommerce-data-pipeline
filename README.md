@@ -254,8 +254,13 @@ uv run --env-file .env python scripts/load_orders.py
 uv run --env-file .env python scripts/load_order_items.py
 ```
 
-Loaders require empty target tables. Each load runs in a transaction and
-checks the source and database row counts before committing.
+The customers loader loads an empty target, skips matching data, and rejects
+differing data when the target is populated.
+
+Orders and order items currently require empty target tables.
+
+Each loader runs in a transaction and checks source and database row counts
+before committing.
 
 Empty CSV fields become SQL NULL. Malformed records and database constraint
 violations stop the transaction.
@@ -290,7 +295,8 @@ docker compose --env-file .env up -d --wait
 uv run --env-file .env python scripts/verify_monthly_summary.py
 ```
 
-Initial loaders intentionally reject non-empty target tables.
+The customers loader supports matching-data reruns.
+Orders and order items still require empty target tables.
 The summary is a view, so its query uses the current staging data.
 
 ## Data Quality Findings
@@ -307,7 +313,7 @@ The cause of the shipped order without items has not been established.
 ## Limitations
 
 - Historical data and manual execution.
-- Initial loading only; incremental loading is not implemented.
+- Incremental loading is not implemented; orders and order items still require empty target tables.
 - No scheduling, dashboard, or cloud deployment.
 - Freight values and product/seller references were not validated.
 - Fresh-clone reproduction is pending verification.
@@ -319,3 +325,4 @@ The cause of the shipped order without items has not been established.
 - [Customers profiling](docs/customers-profiling.md)
 - [Order items profiling](docs/order-items-profiling.md)
 - [V1 validation results](docs/v1-validation.md)
+- [V2 validation results](docs/v2-validation.md)
