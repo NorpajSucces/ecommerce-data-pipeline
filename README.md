@@ -296,6 +296,19 @@ uv run --env-file .env python scripts/verify_monthly_summary.py
 All three loaders support matching-data reruns.
 The summary is a view, so its query uses the current staging data.
 
+### Check Initial Loading in Isolation
+
+```powershell
+uv run --env-file .env python scripts/verify_empty_target.py
+```
+
+This check creates a uniquely named test table in `staging` using the customers
+structure, loads the original customers CSV, and verifies that a matching rerun
+is skipped. It drops only that test table in a `finally` block. Expected statuses
+are `loaded` followed by `skipped`, with 99,441 rows. The three main staging tables
+are not modified. This check does not cover initial orders/items loading with
+foreign-key dependencies.
+
 ## Data Quality Findings
 
 - Order IDs and customer IDs were populated and unique.

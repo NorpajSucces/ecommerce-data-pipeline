@@ -75,6 +75,18 @@ datasets, including original-input reruns after rejection.
 - Changed-input rejection and the subsequent original-input rerun were reviewed
   from a terminal screenshot.
 
+### Empty Target: Isolated Customers Table
+- Ran `uv run --env-file .env python scripts/verify_empty_target.py`.
+- The learner reported the expected output in chat without a terminal screenshot.
+- The script created a uniquely named table in `staging` using
+  `LIKE staging.customers INCLUDING ALL`.
+- Initial status: loaded; CSV rows: 99,441.
+- Rerun status: skipped; database rows: 99,441.
+- The rerun used a new connection and confirmed the committed rows matched the source.
+- The script reported `Test table removed.` after cleanup.
+- This checks the shared initial-load path with the customers structure; it does
+  not verify initial loading of the orders/items foreign-key dependency chain.
+
 ### Monthly Summary After Shared Loader Migration
 - Ran `uv run --env-file .env python scripts/verify_monthly_summary.py`.
 - Result: `Monthly reconciliation passed.`
@@ -95,10 +107,12 @@ Matching is based on complete typed rows, not only counts.
 - Orders CSV: `data/raw/test_cases/orders_changed.csv`.
 - Order items generator: `scripts/create_order_items_test_case.py`.
 - Order items CSV: `data/raw/test_cases/order_items_changed.csv`.
+- Empty-target integration check: `scripts/verify_empty_target.py`.
 - Generated CSV files are excluded from Git.
 
 ## Remaining Verification
-- Initial loading into an empty table using the updated V2 loader.
+- Initial loading of orders and order items into empty targets using the shared
+  loader, including their foreign-key dependencies.
 - Additional invalid-input cases.
 
 ## Remaining Implementation
