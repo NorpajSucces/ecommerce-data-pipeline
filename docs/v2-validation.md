@@ -77,7 +77,7 @@ existing setup with staging tables and the monthly summary view.
 - Changed-input rejection and the subsequent original-input rerun were reviewed
   from a terminal screenshot.
 
-### Empty Target: Isolated Customers Table
+### Empty Target: Isolated Customers Table (Earlier Script Version)
 - Ran `uv run --env-file .env python scripts/verify_empty_target.py`.
 - The learner reported the expected output in chat without a terminal screenshot.
 - The script created a uniquely named table in `staging` using
@@ -88,6 +88,29 @@ existing setup with staging tables and the monthly summary view.
 - The script reported `Test table removed.` after cleanup.
 - This checks the shared initial-load path with the customers structure; it does
   not verify initial loading of the orders/items foreign-key dependency chain.
+
+### Empty Targets: All Datasets with Foreign Keys
+- Ran the expanded `scripts/verify_empty_target.py` using the original CSV files.
+- Three uniquely named tables were created with the staging table structures.
+- Foreign keys explicitly linked test orders to test customers and test items
+  to test orders before loading began.
+- Initial loading ran in customers, orders, order items order.
+
+| Dataset | Initial status | Rerun status | CSV and database rows |
+|---|---|---|---|
+| Customers | loaded | skipped | 99,441 |
+| Orders | loaded | skipped | 99,441 |
+| Order items | loaded | skipped | 112,650 |
+
+- Each loader call used its own connection and transaction. The second pass
+  compared committed target rows with the original CSVs.
+- Cleanup ran in reverse dependency order.
+- Final messages: `Test tables removed.` and
+  `Empty-target dependency check passed.`
+- All six load/rerun results and cleanup messages were reviewed from a terminal
+  screenshot supplied by the learner.
+- This verifies successful loading with foreign keys active. Deliberate invalid
+  foreign-key rejection and fresh-clone setup were not tested by this script.
 
 ### Monthly Summary After Shared Loader Migration
 - Ran `uv run --env-file .env python scripts/verify_monthly_summary.py`.
@@ -140,8 +163,6 @@ Matching is based on complete typed rows, not only counts.
 - Generated CSV files are excluded from Git.
 
 ## Remaining Verification
-- Initial loading of orders and order items into empty targets using the shared
-  loader, including their foreign-key dependencies.
 - Additional invalid-input cases.
 
 ## Remaining Implementation

@@ -324,12 +324,16 @@ success message is absent. It does not connect to PostgreSQL or require `.env`.
 uv run --env-file .env python scripts/verify_empty_target.py
 ```
 
-This check creates a uniquely named test table in `staging` using the customers
-structure, loads the original customers CSV, and verifies that a matching rerun
-is skipped. It drops only that test table in a `finally` block. Expected statuses
-are `loaded` followed by `skipped`, with 99,441 rows. The three main staging tables
-are not modified. This check does not cover initial orders/items loading with
-foreign-key dependencies.
+This check creates three uniquely named test tables in `staging`, copying the
+customers, orders, and order items structures. It explicitly adds foreign keys
+between the test tables, then loads the original CSVs in dependency order.
+A second pass verifies that all matching snapshots are skipped.
+
+Expected results are `loaded` followed by `skipped` for each dataset, with 99,441
+customers, 99,441 orders, and 112,650 items. The script drops only its test tables
+in reverse dependency order in a `finally` block. The three main staging tables
+are not modified. This checks the shared loader with foreign keys active; it
+does not perform a fresh-clone setup or deliberately test invalid foreign keys.
 
 ## Data Quality Findings
 
