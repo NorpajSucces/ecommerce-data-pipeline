@@ -254,10 +254,8 @@ uv run --env-file .env python scripts/load_orders.py
 uv run --env-file .env python scripts/load_order_items.py
 ```
 
-The customers and orders loaders load an empty target, skip matching data, and reject
+All three loaders load an empty target, skip matching data, and reject
 differing data when the target is populated.
-
-Order items currently requires an empty target table.
 
 Each loader runs in a transaction and checks source and database row counts
 before committing.
@@ -295,8 +293,7 @@ docker compose --env-file .env up -d --wait
 uv run --env-file .env python scripts/verify_monthly_summary.py
 ```
 
-The customers and orders loaders support matching-data reruns.
-Order items still requires an empty target table.
+All three loaders support matching-data reruns.
 The summary is a view, so its query uses the current staging data.
 
 ## Data Quality Findings
@@ -313,7 +310,7 @@ The cause of the shipped order without items has not been established.
 ## Limitations
 
 - Historical data and manual execution.
-- Incremental loading is not implemented; order items still requires an empty target table.
+- Incremental loading and updates to existing target rows are not implemented.
 - No scheduling, dashboard, or cloud deployment.
 - Freight values and product/seller references were not validated.
 - Fresh-clone reproduction is pending verification.
