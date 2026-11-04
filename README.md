@@ -286,15 +286,37 @@ docker compose --env-file .env exec postgres psql -U ecommerce -d ecommerce -c "
 
 ## Resuming an Existing Setup
 
-Start PostgreSQL and rerun verification:
+After completing the initial setup, start PostgreSQL and run the pipeline:
 
 ```powershell
 docker compose --env-file .env up -d --wait
-uv run --env-file .env python scripts/verify_monthly_summary.py
+uv run --env-file .env python scripts/run_pipeline.py
 ```
+
+The runner checks the database connection, runs the customers, orders, and order
+items loaders in dependency order, and reconciles the monthly summary against the
+original CSV files. It stops on the first failed step and returns a nonzero exit
+code. Each loader commits independently; the runner does not wrap all steps in
+one transaction.
+
+The staging tables and analytical view must already exist. The runner does not
+start Docker, execute the setup SQL, or schedule future runs. On the existing
+matching dataset, all three loaders report `skipped`, followed by successful
+reconciliation and `Pipeline completed successfully.`
 
 All three loaders support matching-data reruns.
 The summary is a view, so its query uses the current staging data.
+
+### Test Runner Failure Handling
+
+```powershell
+uv run python -m unittest discover -s tests -v
+```
+
+The test directory is named `tests`. The test mocks the subprocess
+calls: connection and customers succeed, then orders fails with exit code 7.
+It checks that no later stage runs, the runner raises `SystemExit(7)`, and the
+success message is absent. It does not connect to PostgreSQL or require `.env`.
 
 ### Check Initial Loading in Isolation
 

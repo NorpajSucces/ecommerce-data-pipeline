@@ -7,6 +7,8 @@ implementation. Customer checks cover both the previous standalone implementatio
 and the shared implementation after migration.
 Matching-input reruns and changed-input rejection have been checked for all three
 datasets, including original-input reruns after rejection.
+The sequential runner is implemented in `scripts/run_pipeline.py` for an
+existing setup with staging tables and the monthly summary view.
 
 ## Implemented Policy
 - Empty target: load incoming data.
@@ -97,6 +99,32 @@ datasets, including original-input reruns after rejection.
   against independent calculations from the original CSV files.
 - The result was reviewed from a terminal screenshot.
 
+### Sequential Runner: Successful Rerun
+- Ran `uv run --env-file .env python scripts/run_pipeline.py`.
+- Database connection check passed.
+- Customers: skipped; CSV and database rows both 99,441.
+- Orders: skipped; CSV and database rows both 99,441.
+- Order items: skipped; CSV and database rows both 112,650.
+- Monthly reconciliation passed: 23 months, 96,478 delivered orders, and
+  total item value 13,221,498.11.
+- Final message: `Pipeline completed successfully.`
+- All five stages and the final message were reviewed from a terminal screenshot.
+- This verifies the successful rerun path. Simulated failure handling is checked
+  separately below.
+
+### Sequential Runner: Simulated Orders Failure
+- Test: `tests/test_run_pipeline.py`.
+- Initial execution by the assistant before the directory rename: 1 test passed (`OK`).
+- After renaming the directory to `tests`, the learner reported the same successful
+  result with `uv run python -m unittest discover -s tests -v`.
+- Subprocess calls were mocked: the first two succeeded and orders raised
+  `CalledProcessError` with exit code 7.
+- Only connection, customers, and orders were called, in that order.
+- The runner raised `SystemExit(7)` and reported the failed orders stage.
+- The success message was absent.
+- This checks control flow under a simulated subprocess failure; it does not
+  exercise an actual loader/database failure.
+
 Runtime checks were executed manually by the learner; evidence is identified above.
 Matching is based on complete typed rows, not only counts.
 
@@ -108,6 +136,7 @@ Matching is based on complete typed rows, not only counts.
 - Order items generator: `scripts/create_order_items_test_case.py`.
 - Order items CSV: `data/raw/test_cases/order_items_changed.csv`.
 - Empty-target integration check: `scripts/verify_empty_target.py`.
+- Runner control-flow test: `tests/test_run_pipeline.py`.
 - Generated CSV files are excluded from Git.
 
 ## Remaining Verification
