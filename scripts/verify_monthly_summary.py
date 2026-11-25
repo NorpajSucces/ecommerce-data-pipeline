@@ -1,13 +1,12 @@
 # Reconcile the monthly SQL summary against the source CSV files.
 
 import csv
-import os
 from collections import Counter, defaultdict
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 
-import psycopg
+from db import get_connection
 
 project_root = Path(__file__).resolve().parent.parent
 raw_directory = project_root / "data" / "raw"
@@ -72,14 +71,7 @@ expected_summary = {
 }
 
 # Read the independently calculated SQL summary.
-with psycopg.connect(
-    host=os.environ["POSTGRES_HOST"],
-    port=int(os.environ["POSTGRES_PORT"]),
-    dbname=os.environ["POSTGRES_DB"],
-    user=os.environ["POSTGRES_USER"],
-    password=os.environ["POSTGRES_PASSWORD"],
-    connect_timeout=10,
-) as connection:
+with get_connection() as connection:
     with connection.cursor() as cursor:
         cursor.execute(
             """

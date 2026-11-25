@@ -5,7 +5,8 @@ from uuid import uuid4
 
 from psycopg import sql
 
-from snapshot_loader import get_connection, load_snapshot
+from db import get_connection
+from snapshot_loader import load_snapshot
 
 project_root = Path(__file__).resolve().parent.parent
 run_id = uuid4().hex

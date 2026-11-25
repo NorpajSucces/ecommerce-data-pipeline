@@ -1,42 +1,11 @@
 # Shared snapshot loading for staging tables.
 
 import csv
-import os
 from pathlib import Path
 
-import psycopg
 from psycopg import sql
 
-
-def get_connection():
-    required_variables = [
-        "POSTGRES_HOST",
-        "POSTGRES_PORT",
-        "POSTGRES_DB",
-        "POSTGRES_USER",
-        "POSTGRES_PASSWORD",
-    ]
-
-    missing_variables = [
-        name
-        for name in required_variables
-        if not os.environ.get(name)
-    ]
-
-    if missing_variables:
-        raise ValueError(
-            "Missing required environment variables: "
-            + ", ".join(missing_variables)
-        )
-
-    return psycopg.connect(
-        host=os.environ["POSTGRES_HOST"],
-        port=int(os.environ["POSTGRES_PORT"]),
-        dbname=os.environ["POSTGRES_DB"],
-        user=os.environ["POSTGRES_USER"],
-        password=os.environ["POSTGRES_PASSWORD"],
-        connect_timeout=10,
-    )
+from db import get_connection
 
 
 def load_snapshot(*, table_name, file_path, expected_columns, key_columns):
@@ -144,19 +113,20 @@ def load_snapshot(*, table_name, file_path, expected_columns, key_columns):
                         """
                         SELECT EXISTS (
                             (
-                                SELECT * FROM {incoming}
+                                SELECT {columns} FROM {incoming}
                                 EXCEPT ALL
-                                SELECT * FROM {target}
+                                SELECT {columns} FROM {target}
                             )
                             UNION ALL
                             (
-                                SELECT * FROM {target}
+                                SELECT {columns} FROM {target}
                                 EXCEPT ALL
-                                SELECT * FROM {incoming}
+                                SELECT {columns} FROM {incoming}
                             )
                         );
                         """
                     ).format(
+                        columns=column_names,
                         incoming=incoming_table,
                         target=target_table,
                     )
